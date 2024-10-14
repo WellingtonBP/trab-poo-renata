@@ -14,7 +14,7 @@ import java.util.List;
 public class UserRepoImpl extends UserRepo {
     private static final Logger LOG = Logger.getLogger(UserRepoImpl.class);
 
-    private AgroalDataSource mysqlDataSource;
+    private final AgroalDataSource mysqlDataSource;
 
     public UserRepoImpl(AgroalDataSource dataSource) {
         this.mysqlDataSource = dataSource;
@@ -30,6 +30,25 @@ public class UserRepoImpl extends UserRepo {
         try(var conn = mysqlDataSource.getConnection();
             var ps = conn.prepareStatement(query)) {
             ps.setInt(1, id);
+            var rs = ps.executeQuery();
+            UserModel user = null;
+            if(rs.next()) {
+                user =  userModelFromResultSet(rs);
+            }
+            rs.close();
+            return user;
+        } catch (SQLException sqlex) {
+            LOG.error(sqlex);
+        }
+        return null;
+    }
+
+    @Override
+    public UserModel getByEmail(String email) {
+        var query = QUERY_GET_USER.concat(" WHERE email = ?");
+        try(var conn = mysqlDataSource.getConnection();
+            var ps = conn.prepareStatement(query)) {
+            ps.setString(1, email);
             var rs = ps.executeQuery();
             UserModel user = null;
             if(rs.next()) {

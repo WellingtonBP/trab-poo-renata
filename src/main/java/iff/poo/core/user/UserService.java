@@ -16,4 +16,8 @@ public class UserService {
         user.setType(type);
         return userRepo.create(user);
     }
+
+    public UserModel getUserByEmail(String email) {
+        return userRepo.getByEmail(email);
+    }
 }
