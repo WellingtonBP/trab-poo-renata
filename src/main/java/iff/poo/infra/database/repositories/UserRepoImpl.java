@@ -25,11 +25,11 @@ public class UserRepoImpl extends UserRepo {
     private static final String QUERY_UPDATE_USER_BY_ID = "UPDATE user SET name = ?, email = ?, password_hash = ?, role = ? WHERE id = ?";
 
     @Override
-    public UserModel getById(int id) {
+    public UserModel getById(Long id) {
         var query = QUERY_GET_USER.concat(" WHERE id = ?");
         try(var conn = mysqlDataSource.getConnection();
             var ps = conn.prepareStatement(query)) {
-            ps.setInt(1, id);
+            ps.setLong(1, id);
             var rs = ps.executeQuery();
             UserModel user = null;
             if(rs.next()) {

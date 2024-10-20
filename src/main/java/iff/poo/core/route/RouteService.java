@@ -3,7 +3,6 @@ package iff.poo.core.route;
 import iff.poo.core.city.CityModel;
 import iff.poo.core.exceptions.AuthException;
 import iff.poo.core.user.UserService;
-import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -29,7 +28,6 @@ public class RouteService {
             List<Double> routeStopsDistances,
             String currUserEmail
     ) throws AuthException {
-        Log.info(currUserEmail);
         var currUser = userService.getUserByEmail(currUserEmail);
         if(currUser == null || !currUser.getType().equals("admin")) {
             throw new AuthException("Only admins can create routes", 403);

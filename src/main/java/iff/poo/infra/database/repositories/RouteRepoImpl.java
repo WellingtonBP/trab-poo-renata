@@ -33,11 +33,11 @@ public class RouteRepoImpl extends RouteRepo {
     private static final String QUERY_DELETE_ROUTE_STOP = "DELETE FROM route_stop";
 
     @Override
-    public RouteModel getById(int id) {
+    public RouteModel getById(Long id) {
         var query = QUERY_GET_ROUTE.concat(" WHERE r.id = ?");
         try(var conn = mysqlDataSource.getConnection();
             var ps = conn.prepareStatement(query)) {
-            ps.setInt(1, id);
+            ps.setLong(1, id);
             var rs = ps.executeQuery();
             var routes = routeModelsFromResultSet(rs);
             rs.close();
@@ -85,17 +85,16 @@ public class RouteRepoImpl extends RouteRepo {
 
     @Override
     public boolean updateById(RouteModel route, Long id) {
-        try {
-            try(var conn = mysqlDataSource.getConnection();
-                var ps = conn.prepareStatement(QUERY_UPDATE_ROUTE)) {
-                ps.setLong(1, route.getOriginCity().getId());
-                ps.setLong(2, route.getDestinyCity().getId());
-                ps.setDouble(3, route.getDistance());
-                ps.setDouble(4, route.getBase_price());
-                ps.setLong(5, id);
-                deleteRouteStopsByRouteId(id);
-                return ps.execute();
-            }
+        try(var conn = mysqlDataSource.getConnection();
+            var ps = conn.prepareStatement(QUERY_UPDATE_ROUTE)) {
+            ps.setLong(1, route.getOriginCity().getId());
+            ps.setLong(2, route.getDestinyCity().getId());
+            ps.setDouble(3, route.getDistance());
+            ps.setDouble(4, route.getBase_price());
+            ps.setLong(5, id);
+            deleteRouteStopsByRouteId(id);
+            createRouteStops(route.getRouteStops(), id);
+            return ps.execute();
         } catch (SQLException sqlex) {
             LOG.error(sqlex);
         }
@@ -128,7 +127,7 @@ public class RouteRepoImpl extends RouteRepo {
 
     private List<RouteModel> routeModelsFromResultSet(ResultSet rs) throws SQLException {
         List<RouteModel> routes = new ArrayList<>();
-        Map<Long, Integer> obtainedRoutes= new HashMap<>();
+        Map<Long, Integer> obtainedRoutes = new HashMap<>();
         while (rs.next()) {
             var id = rs.getLong(1);
             RouteModel route = null;

@@ -25,11 +25,11 @@ public class CityRepoImpl extends CityRepo {
     private static final String QUERY_UPDATE_CITY_BY_ID = "UPDATE city SET name = ?, uf = ? WHERE id = ?";
 
     @Override
-    public CityModel getById(int id) {
+    public CityModel getById(Long id) {
         var query = QUERY_GET_CITY.concat(" WHERE id = ?");
         try(var conn = mysqlDataSource.getConnection();
             var ps = conn.prepareStatement(query)) {
-            ps.setInt(1, id);
+            ps.setLong(1, id);
             var rs = ps.executeQuery();
             CityModel city = null;
             if(rs.next()) {
