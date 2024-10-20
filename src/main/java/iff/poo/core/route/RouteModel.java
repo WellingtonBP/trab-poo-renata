@@ -3,6 +3,8 @@ package iff.poo.core.route;
 import iff.poo.core.city.CityModel;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RouteModel {
     private Long id;
@@ -10,6 +12,7 @@ public class RouteModel {
     private CityModel destinyCity;
     private Double distance;
     private Double base_price;
+    private List<RouteStop> routeStops;
 
     @Data
     public static class RouteStop {
