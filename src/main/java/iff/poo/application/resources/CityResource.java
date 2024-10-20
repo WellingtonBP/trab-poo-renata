@@ -1,15 +1,12 @@
 package iff.poo.application.resources;
 
-import iff.poo.application.dto.UserDto;
+import iff.poo.application.dto.CityDto;
+import iff.poo.core.city.CityService;
 import iff.poo.core.exceptions.AuthException;
-import iff.poo.core.user.UserService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -21,15 +18,15 @@ import org.jboss.logging.Logger;
 
 import java.util.Map;
 
-@Path("/user")
+@Path("/city")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
-public class UserResource {
-    private static final Logger LOG = Logger.getLogger(UserResource.class);
+public class CityResource {
+    private static final Logger LOG = Logger.getLogger(CityResource.class);
 
     @Inject
-    UserService userService;
+    CityService cityService;
 
     @Inject
     JsonWebToken jwt;
@@ -38,25 +35,29 @@ public class UserResource {
     String tokenSub;
 
     @POST
-    public Response createUser(UserDto user) {
+    @RolesAllowed("admin")
+    public Response createCity(@Context SecurityContext ctx, CityDto city) {
         try {
-            var generatedId = userService.createUser(user.name, user.email, user.password, "traveler", null);
+            var generatedId = cityService.createCity(city.name, city.uf, tokenSub);
             return Response.status(201).entity(Map.of("id", generatedId)).build();
+        } catch (AuthException aex) {
+            return Response.status(aex.getHttpStatusCode()).entity(Map.of("message", aex.getMessage())).build();
         } catch (Exception ex) {
             LOG.error(ex);
             return Response.serverError().build();
         }
     }
 
-    @POST
-    @Path("/admin")
-    @RolesAllowed("admin")
-    public Response createAdminUser(@Context SecurityContext ctx, UserDto user) {
+    @GET
+    public Response getCities() {
         try {
-            var generatedId = userService.createUser(user.name, user.email, user.password, "admin", tokenSub);
-            return Response.status(201).entity(Map.of("id", generatedId)).build();
-        } catch (AuthException aex) {
-            return Response.status(aex.getHttpStatusCode()).entity(Map.of("message", aex.getMessage())).build();
+            var cities = cityService.getCities().stream().map(city -> {
+                var cityDto = new CityDto();
+                cityDto.name = city.getName();
+                cityDto.uf = city.getUf();
+                return cityDto;
+            });
+            return Response.ok().entity(cities).build();
         } catch (Exception ex) {
             LOG.error(ex);
             return Response.serverError().build();

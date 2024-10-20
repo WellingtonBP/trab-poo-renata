@@ -4,13 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto {
+public class CityDto {
     @JsonProperty("nome")
     public String name;
 
-    @JsonProperty("email")
-    public String email;
-
-    @JsonProperty("senha")
-    public String password;
+    @JsonProperty("uf")
+    public String uf;
 }

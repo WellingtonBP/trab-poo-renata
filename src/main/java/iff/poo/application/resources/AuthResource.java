@@ -26,7 +26,7 @@ public class AuthResource {
     @POST
     public Response getToken(UserDto userDto) {
         try {
-            String token = authService.generateToken(userDto.email, userDto.password);
+            var token = authService.generateToken(userDto.email, userDto.password);
             return Response.status(201).entity(Map.of("token", token)).build();
         } catch (AuthException aex) {
             LOG.error(aex);
