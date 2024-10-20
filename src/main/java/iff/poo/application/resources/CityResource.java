@@ -53,6 +53,7 @@ public class CityResource {
         try {
             var cities = cityService.getCities().stream().map(city -> {
                 var cityDto = new CityDto();
+                cityDto.id = city.getId();
                 cityDto.name = city.getName();
                 cityDto.uf = city.getUf();
                 return cityDto;

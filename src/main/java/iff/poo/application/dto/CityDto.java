@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CityDto {
+    @JsonProperty("id")
+    public Long id;
+
     @JsonProperty("nome")
     public String name;
 

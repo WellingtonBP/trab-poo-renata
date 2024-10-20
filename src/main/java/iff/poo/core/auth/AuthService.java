@@ -7,6 +7,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.jwt.Claims;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -27,6 +29,7 @@ public class AuthService {
                 .upn(user.getType())
                 .groups(new HashSet<>(Collections.singletonList(user.getType())))
                 .claim(Claims.sub.name(), user.getEmail())
+                .expiresAt(LocalDateTime.now().plusHours(8).toInstant(ZoneOffset.UTC))
                 .sign();
     }
 }
