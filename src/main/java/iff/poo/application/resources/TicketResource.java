@@ -1,12 +1,16 @@
 package iff.poo.application.resources;
 
-import iff.poo.application.dto.UserDto;
+import iff.poo.application.dto.TicketDto;
 import iff.poo.core.exceptions.AuthException;
-import iff.poo.core.user.UserService;
+import iff.poo.core.exceptions.InvalidDataProvidedException;
+import iff.poo.core.ticket.TicketService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,15 +22,15 @@ import org.jboss.logging.Logger;
 
 import java.util.Map;
 
-@Path("/user")
+@Path("/ticket")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
-public class UserResource {
-    private static final Logger LOG = Logger.getLogger(UserResource.class);
+public class TicketResource {
+    private static final Logger LOG = Logger.getLogger(TicketResource.class);
 
     @Inject
-    UserService userService;
+    TicketService ticketService;
 
     @Inject
     JsonWebToken jwt;
@@ -35,25 +39,24 @@ public class UserResource {
     String tokenSub;
 
     @POST
-    public Response createUser(UserDto user) {
+    @RolesAllowed("traveler")
+    public Response createTicker(@Context SecurityContext ctx, TicketDto ticket) {
         try {
-            var generatedId = userService.createUser(user.name, user.email, user.password, "traveler", null);
-            return Response.status(201).entity(Map.of("id", generatedId)).build();
-        } catch (Exception ex) {
-            LOG.error(ex);
-            return Response.serverError().build();
-        }
-    }
-
-    @POST
-    @Path("/admin")
-    @RolesAllowed("admin")
-    public Response createAdminUser(@Context SecurityContext ctx, UserDto user) {
-        try {
-            var generatedId = userService.createUser(user.name, user.email, user.password, "admin", tokenSub);
+            Long generatedId = ticketService.createTicket(
+                ticket.travelId,
+                ticket.originRouteStopId,
+                ticket.destinyRouteStopId,
+                ticket.seatNumber,
+                ticket.payment.type,
+                ticket.payment.status,
+                ticket.payment.meta,
+                tokenSub
+            );
             return Response.status(201).entity(Map.of("id", generatedId)).build();
         } catch (AuthException aex) {
             return Response.status(aex.getHttpStatusCode()).entity(Map.of("message", aex.getMessage())).build();
+        } catch (InvalidDataProvidedException ide) {
+            return Response.status(422).entity(Map.of("message", ide.getMessage())).build();
         } catch (Exception ex) {
             LOG.error(ex);
             return Response.serverError().build();

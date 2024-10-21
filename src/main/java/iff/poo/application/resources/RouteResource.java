@@ -1,7 +1,7 @@
 package iff.poo.application.resources;
 
-import iff.poo.application.dto.CityDto;
 import iff.poo.application.dto.RouteDto;
+import iff.poo.application.util.Mapper;
 import iff.poo.core.exceptions.AuthException;
 import iff.poo.core.route.RouteService;
 import jakarta.annotation.security.RolesAllowed;
@@ -75,35 +75,7 @@ public class RouteResource {
     @RolesAllowed("admin")
     public Response getRoutes(@Context SecurityContext ctx) {
         try {
-            var routes = routeService.getRoutes(tokenSub).stream().map(route -> {
-                var routeDto = new RouteDto();
-                routeDto.id = route.getId();
-                routeDto.distance = route.getDistance();
-                routeDto.basePrice = route.getBase_price();
-                var originCity = new CityDto();
-                originCity.id = route.getOriginCity().getId();
-                originCity.name = route.getOriginCity().getName();
-                originCity.uf = route.getOriginCity().getUf();
-                routeDto.originCity = originCity;
-                var destinyCity = new CityDto();
-                destinyCity.id = route.getDestinyCity().getId();
-                destinyCity.name = route.getDestinyCity().getName();
-                destinyCity.uf = route.getDestinyCity().getUf();
-                routeDto.destinyCity = destinyCity;
-                routeDto.routeStops = route.getRouteStops().stream().map(routeStop -> {
-                    var routeStopDto = new RouteDto.RouteStop();
-                    routeStopDto.id = routeStop.getId();
-                    routeStopDto.stopOrder = routeStop.getStopOrder();
-                    routeStopDto.distanceFromOrigin = route.getDistance();
-                    var routeStopCity = new CityDto();
-                    routeStopCity.id = routeStop.getCity().getId();
-                    routeStopCity.name = routeStop.getCity().getName();
-                    routeStopCity.uf = routeStop.getCity().getUf();
-                    routeStopDto.city = routeStopCity;
-                    return routeStopDto;
-                }).toList();
-                return routeDto;
-            });
+            var routes = Mapper.fromRoute(routeService.getRoutes(tokenSub));
 
             return Response.ok().entity(routes).build();
         } catch (AuthException aex) {

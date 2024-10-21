@@ -55,7 +55,7 @@ public class RouteRepoImpl extends RouteRepo {
             ps.setLong(1, route.getOriginCity().getId());
             ps.setLong(2, route.getDestinyCity().getId());
             ps.setDouble(3, route.getDistance());
-            ps.setDouble(4, route.getBase_price());
+            ps.setDouble(4, route.getBasePrice());
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             rs.next();
@@ -90,7 +90,7 @@ public class RouteRepoImpl extends RouteRepo {
             ps.setLong(1, route.getOriginCity().getId());
             ps.setLong(2, route.getDestinyCity().getId());
             ps.setDouble(3, route.getDistance());
-            ps.setDouble(4, route.getBase_price());
+            ps.setDouble(4, route.getBasePrice());
             ps.setLong(5, id);
             deleteRouteStopsByRouteId(id);
             createRouteStops(route.getRouteStops(), id);
@@ -150,7 +150,7 @@ public class RouteRepoImpl extends RouteRepo {
                 route.setOriginCity(originCity);
                 route.setDestinyCity(destinyCity);
                 route.setDistance(rs.getDouble(8));
-                route.setBase_price(rs.getDouble(9));
+                route.setBasePrice(rs.getDouble(9));
                 route.setRouteStops(new ArrayList<>());
             }
             var routeStopId = rs.getLong(10);

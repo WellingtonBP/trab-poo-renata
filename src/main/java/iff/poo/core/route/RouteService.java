@@ -53,7 +53,7 @@ public class RouteService {
         route.setOriginCity(originCity);
         route.setDestinyCity(destinyCity);
         route.setDistance(distance);
-        route.setBase_price(basePrice);
+        route.setBasePrice(basePrice);
         route.setRouteStops(routeStops);
 
         return routeRepo.create(route);

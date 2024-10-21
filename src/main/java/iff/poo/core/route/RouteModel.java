@@ -11,7 +11,7 @@ public class RouteModel {
     private CityModel originCity;
     private CityModel destinyCity;
     private Double distance;
-    private Double base_price;
+    private Double basePrice;
     private List<RouteStop> routeStops;
 
     @Data

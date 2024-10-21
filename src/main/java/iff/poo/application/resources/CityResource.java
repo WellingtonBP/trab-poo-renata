@@ -1,6 +1,7 @@
 package iff.poo.application.resources;
 
 import iff.poo.application.dto.CityDto;
+import iff.poo.application.util.Mapper;
 import iff.poo.core.city.CityService;
 import iff.poo.core.exceptions.AuthException;
 import jakarta.annotation.security.RolesAllowed;
@@ -51,13 +52,7 @@ public class CityResource {
     @GET
     public Response getCities() {
         try {
-            var cities = cityService.getCities().stream().map(city -> {
-                var cityDto = new CityDto();
-                cityDto.id = city.getId();
-                cityDto.name = city.getName();
-                cityDto.uf = city.getUf();
-                return cityDto;
-            });
+            var cities = Mapper.fromCity(cityService.getCities());
             return Response.ok().entity(cities).build();
         } catch (Exception ex) {
             LOG.error(ex);

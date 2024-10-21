@@ -33,6 +33,12 @@ public class TravelRepoImpl extends TravelRepo {
             "LEFT JOIN city crs ON rs.city_id = crs.id {CONDITIONS} ORDER BY rs.stop_order";
     private static final String QUERY_INSERT_TRAVEL = "INSERT INTO travel (start_date, end_date, status, route_id, vehicle_id) VALUES (?, ?, ?, ?, ?)";
     private static final String QUERY_UPDATE_TRAVEL = "UPDATE travel SET start_date = ?, end_date = ?, status = ?, route_id = ?, vehicle_id = ? WHERE id = ?";
+    private static final String SUB_QUERY_GET_TRAVEL_BY_CITIES = "SELECT DISTINCT t.id FROM travel t INNER JOIN route r ON t.route_id = r.id INNER JOIN city " +
+            "c_origin ON r.origin_city_id = c_origin.id INNER JOIN city c_destiny ON r.destiny_city_id = c_destiny.id " +
+            "LEFT JOIN route_stop rs_origin ON rs_origin.route_id = r.id LEFT JOIN route_stop rs_destiny ON rs_destiny.route_id = " +
+            "r.id LEFT JOIN city cs_origin ON rs_origin.city_id = cs_origin.id LEFT JOIN city cs_destiny ON rs_destiny.city_id = " +
+            "cs_destiny.id WHERE (c_origin.id = ? OR cs_origin.id = ?) AND (c_destiny.id = ? OR cs_destiny.id = ?) AND t.status = " +
+            "'scheduled' AND t.start_date > NOW()";
 
     @Override
     public TravelModel getById(Long id) {
@@ -51,7 +57,21 @@ public class TravelRepoImpl extends TravelRepo {
     }
 
     @Override
-    public TravelModel getTravelByOriginAndDestinyCities(Long originCityId, Long destinyCityId) {
+    public List<TravelModel> getTravelByOriginAndDestinyCities(Long originCityId, Long destinyCityId) {
+        var query = QUERY_GET_TRAVEL.replace("{CONDITIONS}", "WHERE t.id IN (".concat(SUB_QUERY_GET_TRAVEL_BY_CITIES).concat(")"));
+        try(var conn = mysqlDataSource.getConnection();
+            var ps = conn.prepareStatement(query)) {
+            ps.setLong(1, originCityId);
+            ps.setLong(2, originCityId);
+            ps.setLong(3, destinyCityId);
+            ps.setLong(4, destinyCityId);
+            var rs = ps.executeQuery();
+            var travels = travelModelsFromResultSet(rs);
+            rs.close();
+            return travels;
+        } catch (SQLException sqlex) {
+            LOG.error(sqlex);
+        }
         return null;
     }
 
@@ -145,7 +165,7 @@ public class TravelRepoImpl extends TravelRepo {
                 route.setOriginCity(originCity);
                 route.setDestinyCity(destinyCity);
                 route.setDistance(rs.getDouble(17));
-                route.setBase_price(rs.getDouble(18));
+                route.setBasePrice(rs.getDouble(18));
                 route.setRouteStops(new ArrayList<>());
                 travel.setRoute(route);
 
